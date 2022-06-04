@@ -6,9 +6,9 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 
 14 homeworks are organized into branches:
 
-- [x] [`homework1`](https://github.com/mihsamusev/otus_smart_home/tree/homework1) - smart home prototype of 2 devices: socket and termometer
+- [x] [`homework1`](https://github.com/mihsamusev/otus_smart_home/tree/homework1) - Smart home prototype of 2 devices: socket and termometer
 - [x] [`homework2`](https://github.com/mihsamusev/otus_smart_home/tree/homework2) - Smart home layout and device info providers
-- [ ] [`homework3`](https://github.com/mihsamusev/otus_smart_home/tree/homework3) -
+- [ ] [`homework3`](https://github.com/mihsamusev/otus_smart_home/tree/homework3) - Smart home library split into modules and covered by tests
 - [ ] [`homework4`](https://github.com/mihsamusev/otus_smart_home/tree/homework4) -
 - [ ] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) -
 - [ ] [`homework6`](https://github.com/mihsamusev/otus_smart_home/tree/homework6) -
