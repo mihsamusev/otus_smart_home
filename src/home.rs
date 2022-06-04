@@ -34,12 +34,10 @@ impl SmartHome {
         let mut report = format!("[SmartHome: {}] status: \n", self.id);
 
         for (room_id, device_ids) in self.rooms.iter() {
-            let device_statuses: Vec<String> = device_ids
-                .iter()
-                .filter_map(|device_id| provider.status(room_id, device_id))
-                .collect();
-            for status in device_statuses {
-                writeln!(report, "{}", status).unwrap();
+            for id in device_ids {
+                if let Some(status) = provider.status(room_id, id) {
+                    writeln!(report, "{}", status).unwrap();
+                }
             }
         }
         report
