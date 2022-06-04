@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Write;
 
 pub struct SmartHome {
     pub id: String,
@@ -37,7 +38,7 @@ impl SmartHome {
                 .filter_map(|device_id| provider.status(room_id, device_id))
                 .collect();
             for status in device_statuses {
-                report.push_str(&format!("{}\n", status));
+                writeln!(report, "{}", status).unwrap();
             }
         }
         report

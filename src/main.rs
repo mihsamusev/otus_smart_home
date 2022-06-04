@@ -1,5 +1,5 @@
 use smart_home::{DeviceInfoProvider, SmartHome};
-use std::fmt::Display;
+use std::fmt::{Display, Write};
 
 // ***** Пример использования библиотеки умный дом:
 
@@ -70,9 +70,9 @@ impl DeviceInfoProvider for OwningDeviceInfoProvider {
         let mut status_str = format!("[ROOM '{}'] ", room_id);
 
         if self.socket.id == device_id {
-            status_str.push_str(&format!("{}", self.socket))
+            write!(status_str, "{}", self.socket).unwrap();
         } else {
-            status_str.push_str(&format!("Device with id '{}' not provided!", device_id))
+            write!(status_str, "Device with id '{}' not provided!", device_id).unwrap();
         }
         Some(status_str)
     }
@@ -83,11 +83,11 @@ impl<'a, 'b> DeviceInfoProvider for BorrowingDeviceInfoProvider<'a, 'b> {
         let mut status_str = format!("[ROOM '{}'] ", room_id);
 
         if self.socket.id == device_id {
-            status_str.push_str(&format!("{}", self.socket))
+            write!(status_str, "{}", self.socket).unwrap();
         } else if self.thermo.id == device_id {
-            status_str.push_str(&format!("{}", self.thermo))
+            write!(status_str, "{}", self.thermo).unwrap();
         } else {
-            status_str.push_str(&format!("Device with id '{}' not provided!", device_id))
+            write!(status_str, "Device with id '{}' not provided!", device_id).unwrap();
         }
         Some(status_str)
     }
