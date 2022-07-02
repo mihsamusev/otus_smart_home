@@ -1,8 +1,28 @@
-use std::fmt::Display;
+use thiserror::Error;
 
+#[derive(Error, Debug)]
+pub enum ProviderError {
+    #[error("NoDeviceError: device with id '{0}' not provided!")]
+    NoDeviceError(String),
+    #[error("DeviceError:")]
+    DeviceError(#[from] DeviceError),
+}
+
+#[derive(Error, Debug)]
+pub enum DeviceError {
+    #[error("Thermometer error: {0}")]
+    ThermometerError(String),
+    #[error("SmartSocket error: {0}:")]
+    SocketError(String),
+}
+
+pub trait Device {
+    // can ask device all sorts of information through
+    // the network IO
+    fn status(&self) -> Result<String, DeviceError>;
+}
 pub trait DeviceInfoProvider {
-    // todo: метод, возвращающий состояние устройства по имени комнаты и имени устройства
-    fn status(&self, room_id: &str, device_id: &str) -> Option<String>;
+    fn status(&self, device_id: &str) -> Result<String, ProviderError>;
 }
 
 pub struct SmartSocket {
@@ -21,14 +41,13 @@ impl SmartSocket {
     }
 }
 
-impl Display for SmartSocket {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl Device for SmartSocket {
+    fn status(&self) -> Result<String, DeviceError> {
         let state_str = if self.is_on { "on" } else { "off" };
-        write!(
-            f,
+        Ok(format!(
             "[DEVICE: '{}'] [STATUS] SmartSocket is {} and consumes {} W",
             self.id, state_str, self.power_used
-        )
+        ))
     }
 }
 
@@ -46,13 +65,12 @@ impl SmartTermometer {
     }
 }
 
-impl Display for SmartTermometer {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
+impl Device for SmartTermometer {
+    fn status(&self) -> Result<String, DeviceError> {
+        Ok(format!(
             "[DEVICE: '{}'] [STATUS] SmartTermometer shows: {} °C",
             self.id, self.temperature
-        )
+        ))
     }
 }
 

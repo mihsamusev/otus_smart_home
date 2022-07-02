@@ -1,7 +1,5 @@
-use smart_home::device::{DeviceInfoProvider, SmartSocket, SmartTermometer};
+use smart_home::device::{Device, DeviceInfoProvider, ProviderError, SmartSocket, SmartTermometer};
 use smart_home::home::SmartHome;
-use std::fmt::Write;
-
 // ***** Пример использования библиотеки умный дом:
 
 // Пользовательские устройства:
@@ -14,17 +12,14 @@ pub struct MyDevices {
 }
 
 impl DeviceInfoProvider for MyDevices {
-    fn status(&self, room_id: &str, device_id: &str) -> Option<String> {
-        let mut status_str = format!("[ROOM '{}'] ", room_id);
-
+    fn status(&self, device_id: &str) -> Result<String, ProviderError> {
         if self.socket.id == device_id {
-            write!(status_str, "{}", self.socket).unwrap();
+            self.socket.status().map_err(|e| e.into())
         } else if self.thermo.id == device_id {
-            write!(status_str, "{}", self.thermo).unwrap();
+            self.thermo.status().map_err(|e| e.into())
         } else {
-            write!(status_str, "Device with id '{}' not provided!", device_id).unwrap();
+            return Err(ProviderError::NoDeviceError(device_id.into()));
         }
-        Some(status_str)
     }
 }
 
@@ -39,12 +34,12 @@ fn main() {
         .with_room("garage", &["thermo_1"]);
 
     println!("Initialized house '{}' with following layout:", house.id);
-    for room in house.get_rooms() {
+    for room in house.get_rooms().unwrap() {
         println!("room: {}, device ids: {:?}", room, &house.devices(room));
     }
     println!();
 
-    // Строим отчёт с использованием `OwningDeviceInfoProvider`.
+    // Строим отчёт
     let info_provider_1 = MyDevices {
         socket: socket1,
         thermo: thermo1,

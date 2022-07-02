@@ -1,4 +1,5 @@
 use crate::device::DeviceInfoProvider;
+use chrono::Utc;
 use std::collections::HashMap;
 use std::fmt::Write;
 
@@ -22,22 +23,39 @@ impl SmartHome {
         self
     }
 
-    pub fn get_rooms(&self) -> Vec<&String> {
-        self.rooms.keys().collect()
+    // Return a collection of room ids if any
+    //
+    pub fn get_rooms(&self) -> Option<Vec<&String>> {
+        match self.rooms.len() {
+            0 => None,
+            _ => Some(self.rooms.keys().collect()),
+        }
     }
 
+    // Return a collection of device ids if any
+    //
     pub fn devices(&self, room: &str) -> Option<&Vec<String>> {
         self.rooms.get(room)
     }
 
+    // Generates structured report based on device statuses provided by
+    // DeviceInfoProvider
+    //
     pub fn create_report<T: DeviceInfoProvider>(&self, provider: &T) -> String {
-        let mut report = format!("[SmartHome: {}] status: \n", self.id);
+        let datetime = Utc::now();
+        let mut report = format!(
+            "[SmartHome: {}] status on {}: \n",
+            self.id,
+            datetime.format("%Y-%m-%d %H:%M:%S")
+        );
 
         for (room_id, device_ids) in self.rooms.iter() {
             for id in device_ids {
-                if let Some(status) = provider.status(room_id, id) {
-                    writeln!(report, "{}", status).unwrap();
-                }
+                write!(report, "[ROOM '{}'] ", room_id).unwrap();
+                match provider.status(id) {
+                    Ok(ok_status) => writeln!(report, "{}", ok_status).unwrap(),
+                    Err(err_status) => writeln!(report, "{}", err_status).unwrap(),
+                };
             }
         }
         report
@@ -68,12 +86,12 @@ mod tests {
     #[test]
     fn test_get_home_rooms() {
         let empty_home = SmartHome::new("home_0");
-        assert_eq!(empty_home.get_rooms(), Vec::<&String>::new());
+        assert_eq!(empty_home.get_rooms(), None);
 
         let full_home = SmartHome::new("home_1")
             .with_room("room_1", &["device_1"])
             .with_room("room_2", &["device_2"]);
-        let mut rooms = full_home.get_rooms();
+        let mut rooms = full_home.get_rooms().unwrap();
         rooms.sort();
         assert_eq!(rooms, vec!["room_1", "room_2"])
     }
