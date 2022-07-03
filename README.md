@@ -10,7 +10,7 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 - [x] [`homework2`](https://github.com/mihsamusev/otus_smart_home/tree/homework2) - Smart home layout and device info providers
 - [x] [`homework3`](https://github.com/mihsamusev/otus_smart_home/tree/homework3) - Smart home library split into modules and covered by tests
 - [ ] [`homework4`](https://github.com/mihsamusev/otus_smart_home/tree/homework4) - Custom errors and exception flow is added to the library
-- [ ] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) -
+- [ ] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) - Library is refactored so that the smart home owns all device entities instead of keeping track of their id.
 - [ ] [`homework6`](https://github.com/mihsamusev/otus_smart_home/tree/homework6) -
 - [ ] [`homework7`](https://github.com/mihsamusev/otus_smart_home/tree/homework7) -
 - [ ] [`homework8`](https://github.com/mihsamusev/otus_smart_home/tree/homework8) -

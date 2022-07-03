@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -16,7 +18,7 @@ pub enum DeviceError {
     SocketError(String),
 }
 
-pub trait Device {
+pub trait Device: Debug {
     // can ask device all sorts of information through
     // the network IO
     fn status(&self) -> Result<String, DeviceError>;
@@ -25,6 +27,7 @@ pub trait DeviceInfoProvider {
     fn status(&self, device_id: &str) -> Result<String, ProviderError>;
 }
 
+#[derive(Debug)]
 pub struct SmartSocket {
     pub id: String,
     is_on: bool,
@@ -51,6 +54,7 @@ impl Device for SmartSocket {
     }
 }
 
+#[derive(Debug)]
 pub struct SmartTermometer {
     pub id: String,
     temperature: f32,
