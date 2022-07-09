@@ -50,7 +50,6 @@ jobs:
             override: true
       - uses: actions-rs/clippy-check@v1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           args: --all-targets
 
   coverage:
