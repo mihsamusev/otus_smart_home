@@ -18,9 +18,8 @@ pub enum DeviceError {
     SocketError(String),
 }
 
-pub trait Device: Debug {
-    // can ask device all sorts of information through
-    // the network IO
+pub trait Device {
+    fn get_id(&self) -> String;
     fn status(&self) -> Result<String, DeviceError>;
 }
 pub trait DeviceInfoProvider {
@@ -45,6 +44,9 @@ impl SmartSocket {
 }
 
 impl Device for SmartSocket {
+    fn get_id(&self) -> String {
+        self.id.clone()
+    }
     fn status(&self) -> Result<String, DeviceError> {
         let state_str = if self.is_on { "on" } else { "off" };
         Ok(format!(
@@ -70,6 +72,9 @@ impl SmartTermometer {
 }
 
 impl Device for SmartTermometer {
+    fn get_id(&self) -> String {
+        self.id.clone()
+    }
     fn status(&self) -> Result<String, DeviceError> {
         Ok(format!(
             "[DEVICE: '{}'] [STATUS] SmartTermometer shows: {} °C",
@@ -87,7 +92,7 @@ mod tests {
     fn test_construct_socket() {
         let socket = SmartSocket::new("id_1");
         assert_eq!(socket.id, "id_1");
-        assert_eq!(socket.is_on, false);
+        assert!(socket.is_on);
         assert_approx_eq!(f32, socket.power_used, 0.0, epsilon = 0e-8)
     }
 
