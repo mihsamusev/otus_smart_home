@@ -92,7 +92,7 @@ mod tests {
     fn test_construct_socket() {
         let socket = SmartSocket::new("id_1");
         assert_eq!(socket.id, "id_1");
-        assert!(socket.is_on);
+        assert!(!socket.is_on);
         assert_approx_eq!(f32, socket.power_used, 0.0, epsilon = 0e-8)
     }
 
