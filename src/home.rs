@@ -1,4 +1,4 @@
-use crate::device::DeviceInfoProvider;
+use crate::device::client::DeviceInfoProvider;
 use chrono::Utc;
 use std::collections::HashMap;
 use std::fmt::Write;
@@ -59,6 +59,20 @@ impl SmartHome {
             }
         }
         report
+    }
+
+    pub fn run_device_command<T: DeviceInfoProvider>(&self, provider: &T, command_query: &str) -> String {
+        let query_parts: Vec<&str> = command_query.split("/").collect();
+        let room = query_parts[0];
+        let device = query_parts[1];
+        let command = query_parts[2];
+        
+        if let Some(device_ids) = self.rooms.get(room) {
+            if device_ids.containts("device") {
+                
+            }
+        }
+        "Ok".to_string()
     }
 }
 

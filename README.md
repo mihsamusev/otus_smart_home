@@ -20,3 +20,4 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 - [ ] [`homework12`](https://github.com/mihsamusev/otus_smart_home/tree/homework12) -
 - [ ] [`homework13`](https://github.com/mihsamusev/otus_smart_home/tree/homework13) -
 - [ ] [`homework14`](https://github.com/mihsamusev/otus_smart_home/tree/homework14) -
+

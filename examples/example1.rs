@@ -1,11 +1,6 @@
-use smart_home::device::{Device, DeviceInfoProvider, ProviderError, SmartSocket, SmartTermometer};
+use smart_home::device::client::{Device, DeviceInfoProvider, ProviderError, SmartSocket, SmartTermometer};
 use smart_home::home::SmartHome;
-// ***** Пример использования библиотеки умный дом:
 
-// Пользовательские устройства:
-
-// Пользовательские поставщики информации об устройствах.
-// Могут как хранить устройства, так и заимствывать.
 pub struct MyDevices {
     socket: SmartSocket,
     thermo: SmartTermometer,

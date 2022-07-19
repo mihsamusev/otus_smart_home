@@ -1,4 +1,4 @@
-use smart_home::device::{Device, DeviceInfoProvider, ProviderError, SmartSocket};
+use smart_home::device::client::{Device, DeviceInfoProvider, ProviderError, SmartSocket};
 use smart_home::home::SmartHome;
 
 pub struct TestDevices {
