@@ -1,4 +1,4 @@
-use crate::device::client::DeviceInfoProvider;
+use crate::device::client::{DeviceInfoProvider, QueryableInfoProvider};
 use chrono::Utc;
 use std::collections::HashMap;
 use std::fmt::Write;
@@ -50,9 +50,14 @@ impl SmartHome {
         );
 
         for (room_id, device_ids) in self.rooms.iter() {
-            for id in device_ids {
-                write!(report, "[ROOM '{}'] ", room_id).unwrap();
-                match provider.status(id) {
+            for device_id in device_ids {
+                write!(
+                    report,
+                    "[ROOM '{}'] [DEVICE: '{}'] [STATUS] ",
+                    room_id, device_id
+                )
+                .unwrap();
+                match provider.status(device_id) {
                     Ok(ok_status) => writeln!(report, "{}", ok_status).unwrap(),
                     Err(err_status) => writeln!(report, "{}", err_status).unwrap(),
                 };
@@ -61,18 +66,25 @@ impl SmartHome {
         report
     }
 
-    pub fn run_device_command<T: DeviceInfoProvider>(&self, provider: &T, command_query: &str) -> String {
+    pub fn run_device_command<T>(&self, provider: &T, command_query: &str) -> String
+    where
+        T: DeviceInfoProvider + QueryableInfoProvider + 'static,
+    {
         let query_parts: Vec<&str> = command_query.split("/").collect();
         let room = query_parts[0];
         let device = query_parts[1];
         let command = query_parts[2];
-        
+
+        let mut response = String::new();
         if let Some(device_ids) = self.rooms.get(room) {
-            if device_ids.containts("device") {
-                
+            if device_ids.contains(&device.to_string()) {
+                match provider.execute(device, command) {
+                    Ok(ok_status) => writeln!(response, "{}", ok_status).unwrap(),
+                    Err(err_status) => writeln!(response, "{}", err_status).unwrap(),
+                }
             }
         }
-        "Ok".to_string()
+        response
     }
 }
 

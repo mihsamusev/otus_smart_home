@@ -32,6 +32,6 @@ fn test_integration() {
         "[ROOM 'kitchen'] [DEVICE: 'sock_1'] [STATUS] SmartSocket is off and consumes 0 W"
     ));
     assert!(
-        report.contains("[ROOM 'garage'] NoDeviceError: device with id 'thermo_1' not provided!")
+        report.contains("[ROOM 'garage'] [DEVICE: 'thermo_1'] [STATUS] NoDeviceError: device with id 'thermo_1' not provided!")
     )
 }

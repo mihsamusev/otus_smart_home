@@ -1,27 +1,40 @@
+use smart_home::device::client::{
+    Device, DeviceInfoProvider, ProviderError, QueryableInfoProvider, TcpSmartSocket,
+};
+use smart_home::device::server::SmartSocketServer;
+use smart_home::home::SmartHome;
 use std::collections::HashMap;
 use std::net::TcpListener;
 use std::thread;
-use smart_home::home::SmartHome;
-use smart_home::device::client::{Device, DeviceInfoProvider, ProviderError, TcpSmartSocket};
-use smart_home::device::server::{SmartSocketServer};
 
 pub enum NetworkedDeviceType {
-    Socket(TcpSmartSocket)
+    Socket(TcpSmartSocket),
 }
 
 pub struct NetworkedDevices {
-    devices: HashMap<String, NetworkedDeviceType>
+    devices: HashMap<String, NetworkedDeviceType>,
 }
 
 impl DeviceInfoProvider for NetworkedDevices {
     fn status(&self, device_id: &str) -> Result<String, ProviderError> {
         if let Some(device) = self.devices.get(device_id) {
             match device {
-                NetworkedDeviceType::Socket(d) => d.status().map_err(|e| e.into())
+                NetworkedDeviceType::Socket(d) => d.status().map_err(|e| e.into()),
             }
-            
         } else {
-            return Err(ProviderError::NoDeviceError(device_id.into()));
+            return Err(ProviderError::NoDeviceError(device_id.to_string()));
+        }
+    }
+}
+
+impl QueryableInfoProvider for NetworkedDevices {
+    fn execute(&self, device_id: &str, command: &str) -> Result<String, ProviderError> {
+        if let Some(device) = self.devices.get(device_id) {
+            match device {
+                NetworkedDeviceType::Socket(d) => d.execute(command).map_err(|e| e.into()),
+            }
+        } else {
+            return Err(ProviderError::NoDeviceError(device_id.to_string()));
         }
     }
 }
@@ -38,11 +51,11 @@ fn main() {
     // Инициализация дома
     let house = SmartHome::new("my_home").with_room("kitchen", &["sock_1"]);
 
-
     let info_provider_1 = NetworkedDevices {
-        devices: HashMap::from([
-            ("sock_1".into(), NetworkedDeviceType::Socket(TcpSmartSocket::connect(socket_address)))
-        ])
+        devices: HashMap::from([(
+            "sock_1".into(),
+            NetworkedDeviceType::Socket(TcpSmartSocket::connect(socket_address)),
+        )]),
     };
 
     let report1 = house.create_report(&info_provider_1);

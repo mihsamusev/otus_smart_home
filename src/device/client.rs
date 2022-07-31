@@ -1,5 +1,5 @@
+use std::io::{BufRead, BufReader, Write};
 use std::net::TcpStream;
-use std::io::{Write, BufReader, BufRead};
 use std::str;
 use thiserror::Error;
 
@@ -25,8 +25,8 @@ pub trait Device {
     fn status(&self) -> Result<String, DeviceError>;
 }
 
-pub trait ResponsiveDevice {
-    fn execute_command(&self) -> Result<String, DeviceError>;
+pub trait QueryableInfoProvider {
+    fn execute(&self, device_id: &str, command: &str) -> Result<String, ProviderError>;
 }
 
 pub trait DeviceInfoProvider {
@@ -53,8 +53,8 @@ impl Device for SmartSocket {
     fn status(&self) -> Result<String, DeviceError> {
         let state_str = if self.is_on { "on" } else { "off" };
         Ok(format!(
-            "[DEVICE: '{}'] [STATUS] SmartSocket is {} and consumes {} W",
-            self.id, state_str, self.power_used
+            "SmartSocket is {} and consumes {} W",
+            state_str, self.power_used
         ))
     }
 }
@@ -75,37 +75,54 @@ impl SmartTermometer {
 
 impl Device for SmartTermometer {
     fn status(&self) -> Result<String, DeviceError> {
-        Ok(format!(
-            "[DEVICE: '{}'] [STATUS] SmartTermometer shows: {} °C",
-            self.id, self.temperature
-        ))
+        Ok(format!("SmartTermometer shows: {} °C", self.temperature))
     }
 }
 
 pub struct TcpSmartSocket {
-    address: String
+    address: String,
 }
 
 impl TcpSmartSocket {
     pub fn connect(address: &str) -> Self {
-        Self {address: address.into()}
+        Self {
+            address: address.into(),
+        }
+    }
+
+    pub fn execute(&self, command: &str) -> Result<String, DeviceError> {
+        let mut stream = TcpStream::connect(&self.address)
+            .map_err(|e| DeviceError::SocketError(e.to_string()))?;
+
+        // write a GET command to get status
+        stream
+            .write(command.as_bytes())
+            .expect("Something went wrong writting");
+
+        Ok("Ok".to_string())
     }
 }
 
 impl Device for TcpSmartSocket {
     fn status(&self) -> Result<String, DeviceError> {
-        let mut stream = TcpStream::connect(&self.address).expect("TODO SmartScketERRORR");
+        let mut stream = TcpStream::connect(&self.address)
+            .map_err(|e| DeviceError::SocketError(e.to_string()))?;
 
         // write a GET command to get status
-        stream.write("GET".as_bytes()).expect("Something went wrong writting");
-        
+        stream
+            .write("GET".as_bytes())
+            .expect("Something went wrong writting");
+
         // unpack the result
         let mut buf: Vec<u8> = Vec::new();
         let mut reader = BufReader::new(&stream);
-        reader.read_until(b'\n', &mut buf).expect("Something went wrong reading");
-        let response =  str::from_utf8(&buf).unwrap_or_default();
+        reader
+            .read_until(b'\n', &mut buf)
+            .expect("Something went wrong reading");
+        let response = str::from_utf8(&buf).unwrap_or_default();
 
-        Ok(format!("[DEVICE: '99999'] [STATUS] {}", response))
+        // [DEVICE: '99999'] [STATUS]
+        Ok(format!("{}", response))
     }
 }
 
@@ -113,7 +130,7 @@ impl Device for TcpSmartSocket {
 mod tests {
     use super::*;
     use float_cmp::assert_approx_eq;
-    
+
     #[test]
     fn test_construct_socket() {
         let socket = SmartSocket::new("id_1");
@@ -121,7 +138,7 @@ mod tests {
         assert_eq!(socket.is_on, false);
         assert_approx_eq!(f32, socket.power_used, 0.0, epsilon = 0e-8)
     }
-    
+
     #[test]
     fn test_construct_termometer() {
         let term = SmartTermometer::new("id_2");
