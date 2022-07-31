@@ -33,7 +33,7 @@ impl SmartSocketServer {
                     let client_addr = stream.peer_addr().unwrap();
                     let socket_ref = self.device.clone();
                     thread::spawn(move || {
-                        handle_smart_socket(stream, socket_ref)
+                        handle_smart_device(stream, socket_ref)
                             .unwrap_or_else(|_| eprintln!("{} disconnected", client_addr));
                     });
                 }
@@ -42,45 +42,33 @@ impl SmartSocketServer {
     }
 }
 
-fn handle_smart_socket(
+fn handle_smart_device(
     mut stream: TcpStream,
     device: Arc<Mutex<SmartSocketDevice>>,
 ) -> Result<(), io::Error> {
-    //let mut smart_socket = SmartSocketClient::new();
-    // read from the stream until the length of bytes is 0
     let client_addr = &stream.peer_addr()?;
-    println!("[SmartSocket] {} connected", client_addr);
+    println!("[SmartDevice] {} connected", client_addr);
+
     loop {
         let mut buf: [u8; 10] = [0; 10];
         let bytes_read = stream.read(&mut buf)?;
         if bytes_read == 0 {
-            println!("[SmartSocket] {} disconnected", client_addr);
+            println!("[SmartDevice] {} disconnected", client_addr);
             return Ok(());
         }
 
         let mut device = device.lock().unwrap();
-
-        device.update();
         let command = std::str::from_utf8(&buf)
             .unwrap_or_default()
             .trim_matches(char::from(0))
             .trim();
-        let mut status = match command {
-            "SET1" => {
-                device.set_on();
-                device.get_status()
-            }
-            "SET0" => {
-                device.set_off();
-                device.get_status()
-            }
-            "GET" => device.get_status(),
-            _ => String::new(),
-        };
-        println!("[SmartSocket] {}: {}", client_addr, &status);
-        status.push('\n');
-        stream.write(&status.as_bytes())?;
-        // write buffer at read length back
+        let mut response = device.execute(command);
+
+        println!("[SmartDevice] {}: {}", client_addr, &response);
+
+        // send response back to the strem
+        response.push('\n');
+        stream.write(&response.as_bytes())?;
     }
 }
 
@@ -122,5 +110,22 @@ impl SmartSocketDevice {
 
     pub fn get_status(&self) -> String {
         serde_json::to_string(self).unwrap()
+    }
+
+    pub fn execute(&mut self, query: &str) -> String {
+        self.update();
+        let status = match query {
+            "SET1" => {
+                self.set_on();
+                self.get_status()
+            }
+            "SET0" => {
+                self.set_off();
+                self.get_status()
+            }
+            "GET" => self.get_status(),
+            _ => String::new(),
+        };
+        status
     }
 }
