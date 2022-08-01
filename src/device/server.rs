@@ -1,5 +1,5 @@
-use rand;
-use serde::{Deserialize, Serialize};
+use crate::device::mock::SmartSocket;
+use crate::device::QueryableDevice;
 use std::io::{self, Read, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::{Arc, Mutex};
@@ -9,13 +9,13 @@ use std::thread;
 // socket device commandsto simulate the device
 //
 pub struct SmartSocketServer {
-    pub device: Arc<Mutex<SmartSocketDevice>>,
+    pub device: Arc<Mutex<SmartSocket>>,
     pub listener: TcpListener,
 }
 
 impl SmartSocketServer {
     pub fn new(listener: TcpListener) -> Self {
-        let device = Arc::new(Mutex::new(SmartSocketDevice::new()));
+        let device = Arc::new(Mutex::new(SmartSocket::new()));
         Self { device, listener }
     }
 
@@ -44,7 +44,7 @@ impl SmartSocketServer {
 
 fn handle_smart_device(
     mut stream: TcpStream,
-    device: Arc<Mutex<SmartSocketDevice>>,
+    device: Arc<Mutex<SmartSocket>>,
 ) -> Result<(), io::Error> {
     let client_addr = &stream.peer_addr()?;
     println!("[SmartDevice] {} connected", client_addr);
@@ -62,70 +62,15 @@ fn handle_smart_device(
             .unwrap_or_default()
             .trim_matches(char::from(0))
             .trim();
-        let mut response = device.execute(command);
+        let mut response = match device.execute(command) {
+            Ok(ok_resp) => ok_resp,
+            Err(err_resp) => format!("{:?}", err_resp),
+        };
 
         println!("[SmartDevice] {}: {}", client_addr, &response);
 
         // send response back to the strem
         response.push('\n');
-        stream.write(&response.as_bytes())?;
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct SmartSocketDevice {
-    enabled: bool,
-    power: f32,
-}
-
-impl SmartSocketDevice {
-    pub fn new() -> Self {
-        Self {
-            enabled: false,
-            power: 0.0,
-        }
-    }
-
-    pub fn update(&mut self) {
-        if self.enabled {
-            self.power = rand::random::<f32>();
-        }
-    }
-    pub fn get_power_usage(&mut self) -> f32 {
-        self.power
-    }
-
-    pub fn get_enabled(&self) -> bool {
-        self.enabled
-    }
-
-    pub fn set_on(&mut self) {
-        self.enabled = true
-    }
-
-    pub fn set_off(&mut self) {
-        self.enabled = false;
-        self.power = 0.0
-    }
-
-    pub fn get_status(&self) -> String {
-        serde_json::to_string(self).unwrap()
-    }
-
-    pub fn execute(&mut self, query: &str) -> String {
-        self.update();
-        let status = match query {
-            "SET1" => {
-                self.set_on();
-                self.get_status()
-            }
-            "SET0" => {
-                self.set_off();
-                self.get_status()
-            }
-            "GET" => self.get_status(),
-            _ => String::new(),
-        };
-        status
+        stream.write_all(response.as_bytes())?;
     }
 }

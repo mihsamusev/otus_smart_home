@@ -10,8 +10,8 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 - [x] [`homework2`](https://github.com/mihsamusev/otus_smart_home/tree/homework2) - Smart home layout and device info providers
 - [x] [`homework3`](https://github.com/mihsamusev/otus_smart_home/tree/homework3) - Smart home library split into modules and covered by tests
 - [x] [`homework4`](https://github.com/mihsamusev/otus_smart_home/tree/homework4) - Custom errors and exception flow is added to the library
-- [ ] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) -
-- [ ] [`homework6`](https://github.com/mihsamusev/otus_smart_home/tree/homework6) -
+- [x] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) - Library is refactored so that the smart home owns all device entities instead of keeping track of their id.
+- [x] [`homework6`](https://github.com/mihsamusev/otus_smart_home/tree/homework6) - Smart socket can be interacted with by TCP
 - [ ] [`homework7`](https://github.com/mihsamusev/otus_smart_home/tree/homework7) -
 - [ ] [`homework8`](https://github.com/mihsamusev/otus_smart_home/tree/homework8) -
 - [ ] [`homework9`](https://github.com/mihsamusev/otus_smart_home/tree/homework9) -
@@ -21,3 +21,20 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 - [ ] [`homework13`](https://github.com/mihsamusev/otus_smart_home/tree/homework13) -
 - [ ] [`homework14`](https://github.com/mihsamusev/otus_smart_home/tree/homework14) -
 
+# Examples for this submission
+
+Example of network communication between smart socket and smart home
+
+```sh
+cargo run --example net_socket_emulator # start a TCP server for a smart socket that is listenning for commands
+
+# can be run together with 2 client options, normal and interactive
+cargo run --example net_home # non-interactive client
+cargo run --example net_home_interactive # interactive home client
+```
+
+In addition example from previous submissions
+
+```sh
+cargo run --example mock_devices # run exaple of report generation of non-networked smart device mocks
+```

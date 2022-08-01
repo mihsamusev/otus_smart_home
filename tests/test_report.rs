@@ -1,31 +1,40 @@
-use smart_home::device::client::{Device, DeviceInfoProvider, ProviderError, SmartSocket};
+use smart_home::device::mock::SmartSocket;
+use smart_home::device::{InfoDeviceProvider, ProviderError, ReportableDevice};
 use smart_home::home::SmartHome;
+use std::collections::HashMap;
 
-pub struct TestDevices {
-    socket: SmartSocket,
+pub enum DeviceType {
+    Socket(SmartSocket),
 }
 
-impl DeviceInfoProvider for TestDevices {
+pub struct TestDevices {
+    devices: HashMap<String, DeviceType>,
+}
+
+impl InfoDeviceProvider for TestDevices {
     fn status(&self, device_id: &str) -> Result<String, ProviderError> {
-        if self.socket.id == device_id {
-            self.socket.status().map_err(|e| e.into())
+        if let Some(device) = self.devices.get(device_id) {
+            match device {
+                DeviceType::Socket(d) => d.status().map_err(|e| e.into()),
+            }
         } else {
-            Err(ProviderError::NoDeviceError(device_id.into()))
+            Err(ProviderError::NoDeviceError(device_id.to_string()))
         }
     }
 }
+
 #[test]
 fn test_integration() {
-    // Инициализация устройств
-    let socket = SmartSocket::new("sock_1");
-
     // Инициализация дома
     let house = SmartHome::new("my_home")
         .with_room("kitchen", &["sock_1"])
         .with_room("garage", &["thermo_1"]);
 
     // Строим отчёт
-    let info_provider_1 = TestDevices { socket };
+    let info_provider_1 = TestDevices {
+        devices: HashMap::from([("sock_1".to_string(), DeviceType::Socket(SmartSocket::new()))]),
+    };
+
     let report = house.create_report(&info_provider_1);
     dbg!(&report);
     assert!(report.contains(

@@ -1,38 +1,39 @@
-use smart_home::device::client::{
-    Device, DeviceInfoProvider, ProviderError, QueryableInfoProvider, TcpSmartSocket,
+use smart_home::device::client::TcpSmartSocket;
+use smart_home::device::{
+    InfoDeviceProvider, ProviderError, QueryableDevice, QueryableDeviceProvider, ReportableDevice,
 };
-
 use smart_home::home::SmartHome;
+use std::cell::RefCell;
 use std::collections::HashMap;
 
-pub enum NetworkedDeviceType {
-    Socket(TcpSmartSocket),
+pub enum DeviceType {
+    TcpSocket(RefCell<TcpSmartSocket>),
 }
 
-pub struct NetworkedDevices {
-    devices: HashMap<String, NetworkedDeviceType>,
+pub struct MyDevices {
+    devices: HashMap<String, DeviceType>,
 }
 
-impl DeviceInfoProvider for NetworkedDevices {
+impl InfoDeviceProvider for MyDevices {
     fn status(&self, device_id: &str) -> Result<String, ProviderError> {
         if let Some(device) = self.devices.get(device_id) {
             match device {
-                NetworkedDeviceType::Socket(d) => d.status().map_err(|e| e.into()),
+                DeviceType::TcpSocket(d) => d.borrow().status().map_err(|e| e.into()),
             }
         } else {
-            return Err(ProviderError::NoDeviceError(device_id.to_string()));
+            Err(ProviderError::NoDeviceError(device_id.to_string()))
         }
     }
 }
 
-impl QueryableInfoProvider for NetworkedDevices {
-    fn execute(&self, device_id: &str, command: &str) -> Result<String, ProviderError> {
+impl QueryableDeviceProvider for MyDevices {
+    fn execute(&mut self, device_id: &str, command: &str) -> Result<String, ProviderError> {
         if let Some(device) = self.devices.get(device_id) {
             match device {
-                NetworkedDeviceType::Socket(d) => d.execute(command).map_err(|e| e.into()),
+                DeviceType::TcpSocket(d) => d.borrow_mut().execute(command).map_err(|e| e.into()),
             }
         } else {
-            return Err(ProviderError::NoDeviceError(device_id.to_string()));
+            Err(ProviderError::NoDeviceError(device_id.to_string()))
         }
     }
 }
@@ -43,10 +44,10 @@ fn main() {
 
     // initialize device provider
     let socket_address = "127.0.0.1:8888";
-    let info_provider_1 = NetworkedDevices {
+    let mut info_provider_1 = MyDevices {
         devices: HashMap::from([(
-            "sock_1".into(),
-            NetworkedDeviceType::Socket(TcpSmartSocket::connect(&socket_address)),
+            "sock_1".to_string(),
+            DeviceType::TcpSocket(RefCell::new(TcpSmartSocket::connect(socket_address))),
         )]),
     };
 
@@ -55,7 +56,7 @@ fn main() {
     println!("Report #1:\n{report1}");
 
     // send turn on query to smart socket
-    let response = house.run_device_command(&info_provider_1, "kitchen/sock_1/SET1");
+    let response = house.run_device_query(&mut info_provider_1, "kitchen/sock_1/SET1");
     println!(
         "Sending command 'kitchen/sock_1/SET1' to smart home -> {}",
         response

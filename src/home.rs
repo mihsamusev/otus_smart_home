@@ -1,4 +1,4 @@
-use crate::device::client::{DeviceInfoProvider, QueryableInfoProvider};
+use crate::device::{InfoDeviceProvider, QueryableDeviceProvider};
 use chrono::Utc;
 use std::collections::HashMap;
 use std::fmt::Write;
@@ -41,7 +41,10 @@ impl SmartHome {
     // Generates structured report based on device statuses provided by
     // DeviceInfoProvider
     //
-    pub fn create_report<T: DeviceInfoProvider>(&self, provider: &T) -> String {
+    pub fn create_report<T>(&self, provider: &T) -> String
+    where
+        T: InfoDeviceProvider + 'static,
+    {
         let datetime = Utc::now();
         let mut report = format!(
             "[SmartHome: {}] status on {}: \n",
@@ -57,6 +60,7 @@ impl SmartHome {
                     room_id, device_id
                 )
                 .unwrap();
+
                 match provider.status(device_id) {
                     Ok(ok_status) => writeln!(report, "{}", ok_status).unwrap(),
                     Err(err_status) => writeln!(report, "{}", err_status).unwrap(),
@@ -66,16 +70,24 @@ impl SmartHome {
         report
     }
 
-    pub fn run_device_command<T>(&self, provider: &T, command_query: &str) -> String
+    pub fn run_device_query<T>(&self, provider: &mut T, query: &str) -> String
     where
-        T: DeviceInfoProvider + QueryableInfoProvider + 'static,
+        T: QueryableDeviceProvider + 'static,
     {
-        let query_parts: Vec<&str> = command_query.split("/").collect();
+        let mut response = String::new();
+
+        let query_parts: Vec<&str> = query.split('/').collect();
+
+        // TODO: redo as actual Home error
+        if query_parts.len() < 3 {
+            writeln!(response, "QueryError: wrong query format '{}'", query).unwrap();
+            return response;
+        }
+
         let room = query_parts[0];
         let device = query_parts[1];
         let command = query_parts[2];
 
-        let mut response = String::new();
         if let Some(device_ids) = self.rooms.get(room) {
             if device_ids.contains(&device.to_string()) {
                 match provider.execute(device, command) {
