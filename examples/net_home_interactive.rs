@@ -79,7 +79,7 @@ fn main() {
             (
                 "thermo_1".to_string(),
                 DeviceType::UdpThermo(RefCell::new(
-                    UdpThermo::listen(thermo_address).expect("could not can"),
+                    UdpThermo::listen(thermo_address).expect("Cant connect to UDP thermometer"),
                 )),
             ),
         ]),
