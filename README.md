@@ -12,7 +12,7 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 - [x] [`homework4`](https://github.com/mihsamusev/otus_smart_home/tree/homework4) - Custom errors and exception flow is added to the library
 - [x] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) - Library is refactored so that the smart home owns all device entities instead of keeping track of their id.
 - [x] [`homework6`](https://github.com/mihsamusev/otus_smart_home/tree/homework6) - Smart socket can be interacted with by TCP
-- [ ] [`homework7`](https://github.com/mihsamusev/otus_smart_home/tree/homework7) -
+- [x] [`homework7`](https://github.com/mihsamusev/otus_smart_home/tree/homework7) -
 - [ ] [`homework8`](https://github.com/mihsamusev/otus_smart_home/tree/homework8) -
 - [ ] [`homework9`](https://github.com/mihsamusev/otus_smart_home/tree/homework9) -
 - [ ] [`homework10`](https://github.com/mihsamusev/otus_smart_home/tree/homework10) -
@@ -26,11 +26,19 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 Example of network communication between smart socket and smart home
 
 ```sh
-cargo run --example net_socket_emulator # start a TCP server for a smart socket that is listenning for commands
+cargo run --example net_socket_emulator # start a TCP server on 8888 for a smart socket that is listenning for commands
+cargo run --example net_termo_emulator # start a UDP server on 9000 that constantly sends data to port 9001
 
 # can be run together with 2 client options, normal and interactive
 cargo run --example net_home # non-interactive client
-cargo run --example net_home_interactive # interactive home client
+cargo run --example net_home_interactive # interactive home client, can query both devices
+```
+
+In addition on linux `netcat` can be used to test the servers:
+
+```sh
+nc localhost 8888 # start sending messages to TCP SmartSocket server
+nc -u localhost 9000 # start sending messages to UDP SmartThermometer server
 ```
 
 In addition example from previous submissions

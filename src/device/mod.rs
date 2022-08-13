@@ -5,6 +5,16 @@ pub mod server;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+pub enum HomeError {
+    #[error("DeviceNotFoundError: device '{0}' is not registered in smart home")]
+    DeviceNotFoundError(String),
+    #[error("RoomFoundError: room '{0}' is not registered in smart home")]
+    RoomFoundError(String),
+    #[error("QueryError: wrong query format: '{0}'")]
+    QueryFormatError(String),
+}
+
+#[derive(Error, Debug)]
 pub enum ProviderError {
     #[error("NoDeviceError: device with id '{0}' not provided!")]
     NoDeviceError(String),
@@ -14,8 +24,8 @@ pub enum ProviderError {
 
 #[derive(Error, Debug)]
 pub enum DeviceError {
-    #[error("Thermometer error: {0}")]
-    ThermometerError(String),
+    #[error("Thermo error: {0}")]
+    ThermoError(String),
     #[error("SmartSocket error: {0}")]
     SocketError(String),
 }

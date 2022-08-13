@@ -1,4 +1,4 @@
-use smart_home::device::client::TcpSmartSocket;
+use smart_home::device::client::{TcpSmartSocket, UdpThermo};
 use smart_home::device::{
     InfoDeviceProvider, ProviderError, QueryableDevice, QueryableDeviceProvider, ReportableDevice,
 };
@@ -9,6 +9,7 @@ use std::io;
 
 pub enum DeviceType {
     TcpSocket(RefCell<TcpSmartSocket>),
+    UdpThermo(RefCell<UdpThermo>),
 }
 
 pub struct MyDevices {
@@ -20,6 +21,7 @@ impl InfoDeviceProvider for MyDevices {
         if let Some(device) = self.devices.get(device_id) {
             match device {
                 DeviceType::TcpSocket(d) => d.borrow().status().map_err(|e| e.into()),
+                DeviceType::UdpThermo(d) => d.borrow().status().map_err(|e| e.into()),
             }
         } else {
             Err(ProviderError::NoDeviceError(device_id.to_string()))
@@ -32,6 +34,7 @@ impl QueryableDeviceProvider for MyDevices {
         if let Some(device) = self.devices.get(device_id) {
             match device {
                 DeviceType::TcpSocket(d) => d.borrow_mut().execute(command).map_err(|e| e.into()),
+                DeviceType::UdpThermo(d) => d.borrow_mut().execute(command).map_err(|e| e.into()),
             }
         } else {
             Err(ProviderError::NoDeviceError(device_id.to_string()))
@@ -51,21 +54,35 @@ fn get_help() -> String {
         "[Smart socket]\n",
         "   'SET0' - turn off smart socket\n",
         "   'SET1' - turn on smart socket\n",
-        "   'GET' - get smart socket state and power consumption\n"
+        "   'GET' - get smart socket state and power consumption\n",
+        "[Smart thermometer]\n",
+        "   'GET' - get temperature measurement\n"
     )
     .to_string()
 }
 fn main() {
     // Initialize home
-    let home = SmartHome::new("my_home").with_room("kitchen", &["sock_1"]);
+    let home = SmartHome::new("my_home")
+        .with_room("kitchen", &["sock_1"])
+        .with_room("bathroom", &["thermo_1"]);
 
     // initialize device provider
     let socket_address = "127.0.0.1:8888";
+    let thermo_address = "127.0.0.1:9001";
+
     let mut info_provider_1 = MyDevices {
-        devices: HashMap::from([(
-            "sock_1".to_string(),
-            DeviceType::TcpSocket(RefCell::new(TcpSmartSocket::connect(socket_address))),
-        )]),
+        devices: HashMap::from([
+            (
+                "sock_1".to_string(),
+                DeviceType::TcpSocket(RefCell::new(TcpSmartSocket::connect(socket_address))),
+            ),
+            (
+                "thermo_1".to_string(),
+                DeviceType::UdpThermo(RefCell::new(
+                    UdpThermo::listen(thermo_address).expect("could not can"),
+                )),
+            ),
+        ]),
     };
 
     println!("Connected to smart home: '{}' ", &home.id);

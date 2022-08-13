@@ -1,4 +1,4 @@
-use crate::device::{InfoDeviceProvider, QueryableDeviceProvider};
+use crate::device::{HomeError, InfoDeviceProvider, QueryableDeviceProvider};
 use chrono::Utc;
 use std::collections::HashMap;
 use std::fmt::Write;
@@ -79,8 +79,13 @@ impl SmartHome {
         let query_parts: Vec<&str> = query.split('/').collect();
 
         // TODO: redo as actual Home error
-        if query_parts.len() < 3 {
-            writeln!(response, "QueryError: wrong query format '{}'", query).unwrap();
+        if query_parts.len() != 3 {
+            writeln!(
+                response,
+                "{}",
+                HomeError::QueryFormatError(query.to_string())
+            )
+            .unwrap();
             return response;
         }
 
@@ -94,7 +99,16 @@ impl SmartHome {
                     Ok(ok_status) => writeln!(response, "{}", ok_status).unwrap(),
                     Err(err_status) => writeln!(response, "{}", err_status).unwrap(),
                 }
+            } else {
+                writeln!(
+                    response,
+                    "{}",
+                    HomeError::DeviceNotFoundError(device.to_string())
+                )
+                .unwrap();
             }
+        } else {
+            writeln!(response, "{}", HomeError::RoomFoundError(room.to_string())).unwrap();
         }
         response
     }
