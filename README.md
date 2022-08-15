@@ -13,7 +13,7 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 - [x] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) - Library is refactored so that the smart home owns all device entities instead of keeping track of their id.
 - [x] [`homework6`](https://github.com/mihsamusev/otus_smart_home/tree/homework6) - Smart socket can be interacted with by TCP
 - [x] [`homework7`](https://github.com/mihsamusev/otus_smart_home/tree/homework7) - Smart termometer is sending temperature by and can be interacted with using the smart home CLI
-- [ ] [`homework8`](https://github.com/mihsamusev/otus_smart_home/tree/homework8) -
+- [x] [`homework8`](https://github.com/mihsamusev/otus_smart_home/tree/homework8) - Smart devices are managed with async / await interfaces
 - [ ] [`homework9`](https://github.com/mihsamusev/otus_smart_home/tree/homework9) -
 - [ ] [`homework10`](https://github.com/mihsamusev/otus_smart_home/tree/homework10) -
 - [ ] [`homework11`](https://github.com/mihsamusev/otus_smart_home/tree/homework11) -
