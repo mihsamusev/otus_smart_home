@@ -1,6 +1,6 @@
-pub mod client;
 pub mod mock;
 pub mod server;
+pub mod tcp_socket_client;
 
 use thiserror::Error;
 
@@ -18,14 +18,6 @@ pub enum DeviceError {
     ThermometerError(String),
     #[error("SmartSocket error: {0}")]
     SocketError(String),
-}
-
-pub trait QueryableDeviceProvider {
-    fn execute(&mut self, device_id: &str, command: &str) -> Result<String, ProviderError>;
-}
-
-pub trait InfoDeviceProvider {
-    fn status(&self, device_id: &str) -> Result<String, ProviderError>;
 }
 
 pub trait ReportableDevice {
