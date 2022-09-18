@@ -4,45 +4,13 @@ Collection of homework sumbmissions for course [OTUS Rust Developer](https://otu
 
 [![](https://github.com/mihsamusev/otus_smart_home/actions/workflows/build.yml/badge.svg)](https://github.com/mihsamusev/otus_smart_home/actions/workflows/build.yml)
 
-14 homeworks are organized into branches:
+Homework 15
 
-- [x] [`homework1`](https://github.com/mihsamusev/otus_smart_home/tree/homework1) - Smart home prototype of 2 devices: socket and termometer
-- [x] [`homework2`](https://github.com/mihsamusev/otus_smart_home/tree/homework2) - Smart home layout and device info providers
-- [x] [`homework3`](https://github.com/mihsamusev/otus_smart_home/tree/homework3) - Smart home library split into modules and covered by tests
-- [x] [`homework4`](https://github.com/mihsamusev/otus_smart_home/tree/homework4) - Custom errors and exception flow is added to the library
-- [x] [`homework5`](https://github.com/mihsamusev/otus_smart_home/tree/homework5) - Library is refactored so that the smart home owns all device entities instead of keeping track of their id.
-- [x] [`homework6`](https://github.com/mihsamusev/otus_smart_home/tree/homework6) - Smart socket can be interacted with by TCP
-- [x] [`homework7`](https://github.com/mihsamusev/otus_smart_home/tree/homework7) - Smart termometer is sending temperature by and can be interacted with using the smart home CLI
-- [x] [`homework8`](https://github.com/mihsamusev/otus_smart_home/tree/homework8) - Smart devices are managed with async / await interfaces
-- [ ] [`homework9`](https://github.com/mihsamusev/otus_smart_home/tree/homework9) -
-- [ ] [`homework10`](https://github.com/mihsamusev/otus_smart_home/tree/homework10) -
-- [ ] [`homework11`](https://github.com/mihsamusev/otus_smart_home/tree/homework11) -
-- [ ] [`homework12`](https://github.com/mihsamusev/otus_smart_home/tree/homework12) -
-- [ ] [`homework13`](https://github.com/mihsamusev/otus_smart_home/tree/homework13) -
-- [ ] [`homework14`](https://github.com/mihsamusev/otus_smart_home/tree/homework14) -
+- Crate `socket` - dynamic library with C interface that can turn on / off and update power of a socket
+- Crate `app` - application that wraps the library into a safe interface and uses it manipualte the socket
 
-# Examples for this submission
+Run using the following command
 
-Example of network communication between smart socket and smart home
-
-```sh
-cargo run --example net_socket_emulator # start a TCP server on 8888 for a smart socket that is listenning for commands
-cargo run --example net_termo_emulator # start a UDP server on 9000 that constantly sends data to port 9001
-
-# can be run together with 2 client options, normal and interactive
-cargo run --example net_home # non-interactive client
-cargo run --example net_home_interactive # interactive home client, can query both devices
-```
-
-In addition on linux `netcat` can be used to test the servers:
-
-```sh
-nc localhost 8888 # start sending messages to TCP SmartSocket server
-nc -u localhost 9000 # start sending messages to UDP SmartThermometer server
-```
-
-In addition example from previous submissions
-
-```sh
-cargo run --example mock_devices # run exaple of report generation of non-networked smart device mocks
+```bash
+cargo run
 ```
