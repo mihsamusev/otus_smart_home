@@ -18,7 +18,7 @@ fn main() {
 struct MyApp {
     address: String,
     messages: Vec<String>,
-    is_on: bool
+    is_on: bool,
 }
 
 impl Default for MyApp {
@@ -26,7 +26,7 @@ impl Default for MyApp {
         Self {
             address: "127.0.0.1:8888".to_string(),
             messages: Vec::new(),
-            is_on: false
+            is_on: false,
         }
     }
 }
@@ -43,7 +43,7 @@ impl eframe::App for MyApp {
                 let switch_btn = ui.button("Turn on / off").clicked();
                 if switch_btn {
                     self.is_on = !self.is_on;
-                    let next_cmd = if self.is_on {"SET0"} else {"SET1"};
+                    let next_cmd = if self.is_on { "SET0" } else { "SET1" };
 
                     let mut message = Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
                     message.push('\n');

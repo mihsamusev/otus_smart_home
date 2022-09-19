@@ -3,10 +3,9 @@ use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpStream, ToSocketAddrs};
 use std::str;
 
-
 pub fn query(address: impl ToSocketAddrs, query: &str) -> Result<String, DeviceError> {
-    let mut stream = TcpStream::connect(&address)
-        .map_err(|e| DeviceError::SocketError(e.to_string()))?;
+    let mut stream =
+        TcpStream::connect(&address).map_err(|e| DeviceError::SocketError(e.to_string()))?;
 
     // write a command to get status
     stream
